@@ -44,8 +44,8 @@
                 rownumbers: true,//显示行号
                 multiSort: true,//启用排序 sortable: true //启用排序列
                 pagination: true,
-                pageSize: 500,
-                pageList: [50, 200, 500, 1000, 2000],
+                pageSize: 50,
+                pageList: [50, 500, 1000, 2000,5000],
                 queryParams: queryData, //搜索条件查询
                 frozenColumns: [[
                     { field: '选择', checkbox: 'true', width: 30, align: 'center', halign: 'center' },
@@ -134,7 +134,11 @@
                             for (var i = RowDeleteByID.length - 1; i >= 0; i--) {
                                 CardIds += ',' + RowDeleteByID[i].CardId;
                             }
-                            $.messager.confirm("删除信息", "您确认删除该条信息吗？", function (deleteClient) {
+                            var ch = ",";
+                            var reg = "/" + ch + "/g";
+                            var val = "\r\n" + CardIds.replace(eval(reg), "\r\n");
+                            var msg = "您确认删除以下用户吗？" + val;
+                            $.messager.confirm("删除信息", msg, function (deleteClient) {
                                 if (deleteClient) {
                                     $.post("/Home/Delete?r=" + Math.random(), { Id: CardIds }, function (data) {
                                         debugger

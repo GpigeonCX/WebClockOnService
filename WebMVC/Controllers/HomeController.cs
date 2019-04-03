@@ -28,13 +28,13 @@ namespace WebMVC.Controllers
             try
             {
                 int pageIndex = Request["page"] == null ? 1 : int.Parse(Request["page"]);
-                int pageSize = Request["rows"] == null ? 500 : int.Parse(Request["rows"]);
+                int pageSize = Request["rows"] == null ? 50 : int.Parse(Request["rows"]);
                 var data1 = from r in Db.ClockModels.ToList()
                             select new //待优化，格式化放到前台去处理，速度会快
                             {
                                 CardId = r.CardId,//工号
                                 EmployeeName = r.EmployeeName,//名称
-                                LastClockTime = r.LastClockTime.ToString().CompareTo("2010-1-1 0:00:00") > 0 ? r.LastClockTime.ToString() : "",//上次打卡时间
+                                LastClockTime = r.LastClockTime.ToString(),//上次打卡时间
                                 ClockStateAM = r.ClockStateAM,//打卡状态
                                 ClockStatePM = r.ClockStatePM,
                                 TotalDays = r.TotalDays,//打卡天数

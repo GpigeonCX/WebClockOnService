@@ -58,7 +58,7 @@ namespace Quartz.Net.Demo
             //获取所有班级
             var temp = allData.GroupBy(x => x.ClassName).Select(g => new { g.Key }).ToList();
             List<string> allClass = new List<string>();
-            temp.ForEach(x => _dicSucClass.TryAdd(x.Key, 1));
+            temp.ForEach(x => _dicSucClass.TryAdd(x.Key, 2));
             try
             {
                 foreach (var model in allData.OrderBy(P => Guid.NewGuid()))
