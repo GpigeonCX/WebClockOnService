@@ -1,0 +1,12 @@
+1、根据系统当前时间time1 查询
+            OnTimeStart<time1<OnTimeEnd
+            or
+            OffTimeStart<time1<OffTimeEnd
+            and ClockState=false 打卡状态为未打卡
+            and FLAG=true
+            随机排序
+取卡号 开始操作。
+
+2、每天零点更新全部 打卡状态ClockState=false
+3、每天零点更新 CreatTime加上TotalDays小于系统时间的 
+FLAG改为false，置为无效

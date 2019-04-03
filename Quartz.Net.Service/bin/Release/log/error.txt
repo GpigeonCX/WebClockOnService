@@ -1,0 +1,11 @@
+﻿2019-03-17 12:08:59,564 ERROR Quartz.Plugin.Xml.XMLSchedulingDataProcessorPlugin - Error scheduling jobs: 未能从程序集“Quartz.Net.Job”中加载类型“Quartz.Net.Job. Heartbeat”。
+System.TypeLoadException: 未能从程序集“Quartz.Net.Job”中加载类型“Quartz.Net.Job. Heartbeat”。
+   在 System.RuntimeTypeHandle.GetTypeByName(String name, Boolean throwOnError, Boolean ignoreCase, Boolean reflectionOnly, StackCrawlMarkHandle stackMark, IntPtr pPrivHostBinder, Boolean loadTypeFromPartialName, ObjectHandleOnStack type)
+   在 System.RuntimeTypeHandle.GetTypeByName(String name, Boolean throwOnError, Boolean ignoreCase, Boolean reflectionOnly, StackCrawlMark& stackMark, IntPtr pPrivHostBinder, Boolean loadTypeFromPartialName)
+   在 System.RuntimeType.GetType(String typeName, Boolean throwOnError, Boolean ignoreCase, Boolean reflectionOnly, StackCrawlMark& stackMark)
+   在 System.Type.GetType(String typeName, Boolean throwOnError)
+   在 Quartz.Simpl.SimpleTypeLoadHelper.LoadType(String name)
+   在 Quartz.Xml.XMLSchedulingDataProcessor.ProcessInternal(String xml)
+   在 Quartz.Xml.XMLSchedulingDataProcessor.ProcessFile(String fileName, String systemId)
+   在 Quartz.Xml.XMLSchedulingDataProcessor.ProcessFileAndScheduleJobs(String fileName, String systemId, IScheduler sched)
+   在 Quartz.Plugin.Xml.XMLSchedulingDataProcessorPlugin.ProcessFile(JobFile jobFile)

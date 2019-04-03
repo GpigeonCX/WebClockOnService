@@ -1,0 +1,12 @@
+c:\users\13756\source\repos\ClockInServices\ClockInService\bin\Debug\ClockInService.pdb
+c:\users\13756\source\repos\ClockInServices\ClockInService\obj\Debug\ClockInService.csprojAssemblyReference.cache
+c:\users\13756\source\repos\ClockInServices\ClockInService\obj\Debug\ClockInService.csproj.CoreCompileInputs.cache
+c:\users\13756\source\repos\ClockInServices\ClockInService\obj\Debug\ClockInService.pdb
+c:\users\13756\source\repos\ClockInServices\ClockInService\bin\Debug\EntityFramework.dll
+c:\users\13756\source\repos\ClockInServices\ClockInService\bin\Debug\EntityFramework.SqlServer.dll
+c:\users\13756\source\repos\ClockInServices\ClockInService\bin\Debug\EntityFramework.xml
+c:\users\13756\source\repos\ClockInServices\ClockInService\bin\Debug\EntityFramework.SqlServer.xml
+c:\users\13756\source\repos\ClockInServices\ClockInService\obj\Debug\ClockInService.csproj.CopyComplete
+c:\users\13756\source\repos\ClockInServices\ClockInService\bin\Debug\ClockInService.exe.config
+c:\users\13756\source\repos\ClockInServices\ClockInService\bin\Debug\ClockInService.exe
+c:\users\13756\source\repos\ClockInServices\ClockInService\obj\Debug\ClockInService.exe

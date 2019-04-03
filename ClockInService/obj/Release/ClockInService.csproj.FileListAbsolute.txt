@@ -1,0 +1,12 @@
+C:\Users\13756\Desktop\MVCEFEasyUISourceCode\ClockInService\bin\Release\ClockInService.pdb
+C:\Users\13756\Desktop\MVCEFEasyUISourceCode\ClockInService\bin\Release\EntityFramework.dll
+C:\Users\13756\Desktop\MVCEFEasyUISourceCode\ClockInService\bin\Release\EntityFramework.SqlServer.dll
+C:\Users\13756\Desktop\MVCEFEasyUISourceCode\ClockInService\bin\Release\EntityFramework.xml
+C:\Users\13756\Desktop\MVCEFEasyUISourceCode\ClockInService\bin\Release\EntityFramework.SqlServer.xml
+C:\Users\13756\Desktop\MVCEFEasyUISourceCode\ClockInService\obj\Release\ClockInService.csproj.CoreCompileInputs.cache
+C:\Users\13756\Desktop\MVCEFEasyUISourceCode\ClockInService\obj\Release\ClockInService.csproj.CopyComplete
+C:\Users\13756\Desktop\MVCEFEasyUISourceCode\ClockInService\obj\Release\ClockInService.pdb
+C:\Users\13756\Desktop\MVCEFEasyUISourceCode\ClockInService\bin\Release\EntityFramework.Utilities.dll
+C:\Users\13756\Desktop\MVCEFEasyUISourceCode\ClockInService\bin\Release\ClockInService.dll.config
+C:\Users\13756\Desktop\MVCEFEasyUISourceCode\ClockInService\bin\Release\ClockInService.dll
+C:\Users\13756\Desktop\MVCEFEasyUISourceCode\ClockInService\obj\Release\ClockInService.dll
