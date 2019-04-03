@@ -46,3 +46,15 @@ F:\WebMVC\WebMVC\Common\obj\Debug\Common.csproj.CoreCompileInputs.cache
 F:\WebMVC\WebMVC\Common\obj\Debug\Common.csproj.CopyComplete
 F:\WebMVC\WebMVC\Common\obj\Debug\Common.dll
 F:\WebMVC\WebMVC\Common\obj\Debug\Common.pdb
+F:\GitHub\WebClockOnService\Common\bin\Debug\Common.dll
+F:\GitHub\WebClockOnService\Common\bin\Debug\Common.pdb
+F:\GitHub\WebClockOnService\Common\bin\Debug\ICSharpCode.SharpZipLib.dll
+F:\GitHub\WebClockOnService\Common\bin\Debug\NPOI.dll
+F:\GitHub\WebClockOnService\Common\bin\Debug\NPOI.OOXML.dll
+F:\GitHub\WebClockOnService\Common\bin\Debug\NPOI.OpenXml4Net.dll
+F:\GitHub\WebClockOnService\Common\bin\Debug\NPOI.OpenXmlFormats.dll
+F:\GitHub\WebClockOnService\Common\obj\Debug\Common.csprojAssemblyReference.cache
+F:\GitHub\WebClockOnService\Common\obj\Debug\Common.csproj.CoreCompileInputs.cache
+F:\GitHub\WebClockOnService\Common\obj\Debug\Common.csproj.CopyComplete
+F:\GitHub\WebClockOnService\Common\obj\Debug\Common.dll
+F:\GitHub\WebClockOnService\Common\obj\Debug\Common.pdb
