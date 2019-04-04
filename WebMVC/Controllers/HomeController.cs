@@ -279,8 +279,7 @@ namespace WebMVC.Controllers
                                   select r).FirstOrDefault();
                     if (model1.CreatTime.AddDays(model1.TotalDays).Subtract(now).Days <= 0)
                         continue;
-                    model1.flag = true ? false : true;//暂停或者恢复正常
-                    Db.SaveChanges();
+                    model1.flag = model1.flag ? false : true;//暂停或者恢复正常
                     Db.ClockModels.Attach(model1);
                     Db.Entry<ClockModels>(model1).State = EntityState.Modified;
                 }
