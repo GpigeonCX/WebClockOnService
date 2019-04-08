@@ -53,7 +53,8 @@ namespace Quartz.Net.Demo
             //.Where(r => _now.TimeOfDay.TotalHours-  Convert.ToDateTime(Convert.ToDateTime(r.LastClockTime).ToShortTimeString()).TimeOfDay.TotalHours > 1);
             var ClassName = "";
             JObject studentsJson = null;
-            string strResult = "";
+            string strResult1 = "";
+            string strResult2 = "";
             IEnumerable<JToken> studentsList;
             //获取所有班级
             var temp = allData.GroupBy(x => x.ClassName).Select(g => new { g.Key }).ToList();
@@ -73,17 +74,18 @@ namespace Quartz.Net.Demo
 
                     ClassName = System.Text.RegularExpressions.Regex.Replace(model.ClassName, @"[^0-9]+", "");
                     var response1 = HttpPost(posturl1, "idcard=" + model.CardId);
-                    strResult = Unicode2String(response1);//正常字符串结果
-                    if (strResult.Contains("第一步成功"))
+                    strResult1 = Unicode2String(response1);//正常字符串结果
+                    if (strResult1.Contains("第一步成功"))
                     {
                         try
                         {
                             studentsJson = JObject.Parse(response1);
                         }
-                        catch (Exception)
+                        catch (Exception ex)
                         {
+                            logger.Warn($"第一步网站JSON返回解析错误{strResult1}");
                             model.ClockState = false;
-                            model.FailedReason = strResult;
+                            model.FailedReason += strResult1 + DateTime.Now;
                             Db.ClockBatch.Attach(model);
                             Db.Entry<ClockBatch>(model).State = EntityState.Modified;
                             Db.SaveChanges();
@@ -93,27 +95,36 @@ namespace Quartz.Net.Demo
                         foreach (var item in studentsList)
                         {
                             //找到班级名称对应的班级ID 放入班级ID字典  从右边取10个字符，然后正则取纯数字。OS：我是被逼的
-                            if (ClassName.Equals(System.Text.RegularExpressions.Regex.Replace(item["tname"].ToString().Remove(0, item["tname"].ToString().Length - 10), @"[^0-9]+", "")))
+                            if (ClassName.Equals(Regex.Replace(item["tname"].ToString().Remove(0, item["tname"].ToString().Length - 10), @"[^0-9]+", "")))
                             {
                                 if (!_dicClassID.ContainsKey(model.ClassName))
                                 {
-                                    _dicClassID.TryAdd(ClassName, item["id"].ToString());
+                                    _dicClassID.TryAdd(model.ClassName, item["id"].ToString());//key用model.ClassName是因为有：不同老师的班，但是数字相同的情况
                                     break;
                                 }
                             };
                         }
-                        if (!_dicClassID.ContainsKey(ClassName))
+                        if (!_dicClassID.ContainsKey(model.ClassName))
                         {
                             logger.Warn($"打卡失败，请该工号{model.CardId}是否在该班级");
                             continue;
                         }
 
-                        var response2 = HttpPost(posturl2, "class_id=" + _dicClassID[ClassName]
+                        var response2 = HttpPost(posturl2, "class_id=" + _dicClassID[model.ClassName]
                          , new Dictionary<string, string>()
                          {
                             { "cookie", _dicCookie[string.Format("idcard={0}",model.CardId)] }
                          });
-                        if (JObject.Parse(response2).ToString().Contains("成功"))
+                        try
+                        {
+                            strResult2 = JObject.Parse(response2).ToString();
+                        }
+                        catch (Exception)
+                        {
+                            logger.Warn($"第二步网站JSON返回解析错误{Unicode2String(response2)}");
+                            continue;
+                        }
+                        if (strResult2.Contains("成功"))
                         {
                             model.LastClockTime = DateTime.Now;
                             model.ClockState = true;
@@ -125,11 +136,11 @@ namespace Quartz.Net.Demo
                             _dicSucClass[model.ClassName]++; //此次操作成功次数
                             Thread.Sleep(new Random().Next(3000, 6000));
                         }
-                        else if ((JObject.Parse(response2).ToString().Contains("已签到")))
+                        else if ((strResult2.Contains("已签到")))
                         {
                             model.LastClockTime = DateTime.Now;
-                            model.ClockState = false;
-                            model.FailedReason = JObject.Parse(response2)["msg"].ToString() + DateTime.Now.ToString();
+                            model.ClockState = true;
+                            model.FailedReason += JObject.Parse(response2)["msg"].ToString() + DateTime.Now.ToString();
                             Db.ClockBatch.Attach(model);
                             Db.Entry<ClockBatch>(model).State = EntityState.Modified;
                             Db.SaveChanges();
@@ -138,7 +149,7 @@ namespace Quartz.Net.Demo
                         else
                         {
                             model.ClockState = false;
-                            model.FailedReason = JObject.Parse(response2)["msg"].ToString() + DateTime.Now.ToString();
+                            model.FailedReason += JObject.Parse(response2)["msg"].ToString() + DateTime.Now.ToString();
                             Db.ClockBatch.Attach(model);
                             Db.Entry<ClockBatch>(model).State = EntityState.Modified;
                             Db.SaveChanges();
@@ -150,7 +161,7 @@ namespace Quartz.Net.Demo
                     else
                     {
                         model.ClockState = false;
-                        model.FailedReason = strResult;
+                        model.FailedReason += strResult1 + DateTime.Now;
                         Db.ClockBatch.Attach(model);
                         Db.Entry<ClockBatch>(model).State = EntityState.Modified;
                         Db.SaveChanges();
