@@ -50,7 +50,6 @@ F:\GitHub\WebClockOnService\Quartz.Net.Demo\bin\Debug\Quartz.Net.Demo.pdb
 F:\GitHub\WebClockOnService\Quartz.Net.Demo\bin\Debug\EntityFramework.SqlServer.dll
 F:\GitHub\WebClockOnService\Quartz.Net.Demo\bin\Debug\EntityFramework.Utilities.dll
 F:\GitHub\WebClockOnService\Quartz.Net.Demo\bin\Debug\EntityFramework.SqlServer.xml
-F:\GitHub\WebClockOnService\Quartz.Net.Demo\obj\Debug\Quartz.Net.Demo.csprojAssemblyReference.cache
 F:\GitHub\WebClockOnService\Quartz.Net.Demo\obj\Debug\Quartz.Net.Demo.csproj.CoreCompileInputs.cache
 F:\GitHub\WebClockOnService\Quartz.Net.Demo\obj\Debug\Quartz.Net.Demo.csproj.CopyComplete
 F:\GitHub\WebClockOnService\Quartz.Net.Demo\obj\Debug\Quartz.Net.Demo.dll

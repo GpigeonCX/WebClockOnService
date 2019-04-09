@@ -40,36 +40,69 @@
 
   每个整点执行一次：0 0 0/1 * * ?-->
   <schedule>
-    <!--定义示例任务1 Job-->
+    <!--定义任务1 Job-->
     <job>
       <name>DemoJob1</name>
       <group>DeomJobGroup</group>
-      <description>Quartz.Net示例任务1</description>
+      <description>日常打卡</description>
       <job-type>Quartz.Net.Demo.DemoJob1,Quartz.Net.Demo</job-type>
       <durable>true</durable>
       <recover>false</recover>
     </job>
-
-    <!--定义示例任务2 Job-->
-    <job>
-      <name>DemoJob2</name>
-      <group>DeomJobGroup</group>
-      <description>Quartz.Net示例任务2</description>
-      <job-type>Quartz.Net.Demo.DemoJob2,Quartz.Net.Demo</job-type>
-      <durable>true</durable>
-      <recover>false</recover>
-    </job>
-
-    <!--定义示例任务1 触发器 每5分钟执行一次DemoJob1任务-->
+    
+    <!--定义 触发器 每8分钟执行一次DemoJob1任务-->
     <trigger>
       <cron>
         <name>DemoJob1Trigger</name>
         <group>DeomJobTriggerGroup</group>
         <job-name>DemoJob1</job-name>
         <job-group>DeomJobGroup</job-group>
-        <cron-expression>0 */5 * * * ?</cron-expression>
+        <cron-expression>0 */8 * * * ?</cron-expression>
       </cron>
     </trigger>
+    
+    <!--定义任务2 Job-->
+    <job>
+      <name>DemoJob2</name>
+      <group>DeomJobGroup</group>
+      <description>每日重置打卡</description>
+      <job-type>Quartz.Net.Demo.DemoJob2,Quartz.Net.Demo</job-type>
+      <durable>true</durable>
+      <recover>false</recover>
+    </job>
+    
+    <!--定义示例任务2 触发器 每天凌晨00:00执行一次DemoJob2任务-->
+    <trigger>
+      <cron>
+        <name>DemoJob2Trigger2</name>
+        <group>DeomJobTriggerGroup</group>
+        <job-name>DemoJob2</job-name>
+        <job-group>DeomJobGroup</job-group>
+        <cron-expression>0 0 0 * * ?</cron-expression>
+      </cron>
+    </trigger>
+    
+    <!--定义任务3 Job-->
+    <job>
+      <name>ClockBatchJob3</name>
+      <group>DeomJobGroup</group>
+      <description>班级打卡</description>
+      <job-type>Quartz.Net.Demo.ClockBatchJob3,Quartz.Net.Demo</job-type>
+      <durable>true</durable>
+      <recover>false</recover>
+    </job>
+
+    <!--定义 触发器 每8分钟执行一次ClockBatchJob任务-->
+    <trigger>
+      <cron>
+        <name>ClockBatchJobTrigger</name>
+        <group>DeomJobTriggerGroup</group>
+        <job-name>ClockBatchJob3</job-name>
+        <job-group>DeomJobGroup</job-group>
+        <cron-expression>0 */8 * * * ?</cron-expression>
+      </cron>
+    </trigger>
+    
 
     <!--定义示例任务2 触发器 每分钟执行一次DemoJob2任务-->
     <!--<trigger>
@@ -82,15 +115,6 @@
       </cron>
     </trigger>-->
 
-    <!--定义示例任务2 触发器 每天凌晨00:00执行一次DemoJob2任务-->
-    <trigger>
-      <cron>
-        <name>DemoJob2Trigger2</name>
-        <group>DeomJobTriggerGroup</group>
-        <job-name>DemoJob2</job-name>
-        <job-group>DeomJobGroup</job-group>
-        <cron-expression>0 0 0 * * ?</cron-expression>
-      </cron>
-    </trigger>
+
   </schedule>
 </job-scheduling-data>

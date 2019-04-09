@@ -89,6 +89,7 @@ namespace Quartz.Net.Demo
                             Db.ClockBatch.Attach(model);
                             Db.Entry<ClockBatch>(model).State = EntityState.Modified;
                             Db.SaveChanges();
+                            _dicSucClass[model.ClassName]--;
                             continue;
                         }
                         studentsList = studentsJson["data"]["classes"].AsEnumerable();
@@ -107,6 +108,7 @@ namespace Quartz.Net.Demo
                         if (!_dicClassID.ContainsKey(model.ClassName))
                         {
                             logger.Warn($"打卡失败，请该工号{model.CardId}是否在该班级");
+                            _dicSucClass[model.ClassName]--;
                             continue;
                         }
 
@@ -122,6 +124,7 @@ namespace Quartz.Net.Demo
                         catch (Exception)
                         {
                             logger.Warn($"第二步网站JSON返回解析错误{Unicode2String(response2)}");
+                            _dicSucClass[model.ClassName]--;
                             continue;
                         }
                         if (strResult2.Contains("成功"))
@@ -136,7 +139,7 @@ namespace Quartz.Net.Demo
                             _dicSucClass[model.ClassName]++; //此次操作成功次数
                             Thread.Sleep(new Random().Next(3000, 6000));
                         }
-                        else if ((strResult2.Contains("已签到")))
+                        else if ((strResult2.Contains("已签")))
                         {
                             model.LastClockTime = DateTime.Now;
                             model.ClockState = true;

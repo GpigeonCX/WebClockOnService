@@ -56,3 +56,17 @@ C:\Users\13756\Desktop\MVCEFEasyUISourceCode\Quartz.Net.Demo\obj\Release\Quartz.
 C:\Users\13756\Desktop\MVCEFEasyUISourceCode\Quartz.Net.Demo\obj\Release\Quartz.Net.Demo.dll
 C:\Users\13756\Desktop\MVCEFEasyUISourceCode\Quartz.Net.Demo\obj\Release\Quartz.Net.Demo.pdb
 C:\Users\13756\Desktop\MVCEFEasyUISourceCode\Quartz.Net.Demo\obj\Release\Quartz.Net.Demo.csprojAssemblyReference.cache
+F:\GitHub\WebClockOnService\Quartz.Net.Demo\bin\Release\quartz_jobs.xml
+F:\GitHub\WebClockOnService\Quartz.Net.Demo\bin\Release\Quartz.Net.Demo.dll.config
+F:\GitHub\WebClockOnService\Quartz.Net.Demo\bin\Release\Quartz.Net.Demo.dll
+F:\GitHub\WebClockOnService\Quartz.Net.Demo\bin\Release\Quartz.Net.Demo.pdb
+F:\GitHub\WebClockOnService\Quartz.Net.Demo\bin\Release\EntityFramework.dll
+F:\GitHub\WebClockOnService\Quartz.Net.Demo\bin\Release\EntityFramework.SqlServer.dll
+F:\GitHub\WebClockOnService\Quartz.Net.Demo\bin\Release\EntityFramework.Utilities.dll
+F:\GitHub\WebClockOnService\Quartz.Net.Demo\bin\Release\Newtonsoft.Json.dll
+F:\GitHub\WebClockOnService\Quartz.Net.Demo\bin\Release\EntityFramework.SqlServer.xml
+F:\GitHub\WebClockOnService\Quartz.Net.Demo\obj\Release\Quartz.Net.Demo.csprojAssemblyReference.cache
+F:\GitHub\WebClockOnService\Quartz.Net.Demo\obj\Release\Quartz.Net.Demo.csproj.CoreCompileInputs.cache
+F:\GitHub\WebClockOnService\Quartz.Net.Demo\obj\Release\Quartz.Net.Demo.csproj.CopyComplete
+F:\GitHub\WebClockOnService\Quartz.Net.Demo\obj\Release\Quartz.Net.Demo.dll
+F:\GitHub\WebClockOnService\Quartz.Net.Demo\obj\Release\Quartz.Net.Demo.pdb

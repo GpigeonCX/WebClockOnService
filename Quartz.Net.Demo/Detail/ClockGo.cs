@@ -133,7 +133,7 @@ namespace Quartz.Net.Demo
                             Cloc.FailReason = null;
                             Db.Entry<ClockModels>(Cloc).State = System.Data.Entity.EntityState.Modified;
                             Db.SaveChanges();
-                            Thread.Sleep(1000);
+                            Thread.Sleep(500);
                         }
                         else
                         {
