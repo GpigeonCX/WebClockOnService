@@ -24,7 +24,7 @@ namespace Quartz.Net.Demo
             }
             catch (Exception ex)
             {
-                logger.Error("检查打卡用并执行打卡操作时发生异常！！！！！ ClockGo().Main()", ex);
+                logger.Fatal("检查打卡用并执行打卡操作时发生异常！！！！！ ClockGo().Main()", ex);
             }
 
         }

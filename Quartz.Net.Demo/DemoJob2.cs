@@ -22,7 +22,7 @@ namespace Quartz.Net.Demo
             }
             catch (Exception ex)
             {
-                logger.Error("每天定时（默认0点）清理所有打卡状态数据及过期用户   运行异常 ClockReset().Reset()", ex);
+                logger.Fatal("每天定时（默认0点）清理所有打卡状态数据及过期用户   运行异常 ClockReset().Reset()", ex);
             }
 
         }

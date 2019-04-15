@@ -30,7 +30,7 @@ namespace Quartz.Net.Demo
             }
             catch (Exception ex)
             {
-                logger.Error("检查打卡用并执行打卡操作时发生异常！！！！！ClockBatchGo() ", ex);
+                logger.Fatal("检查打卡用并执行打卡操作时发生异常！！！！！ClockBatchGo() ", ex);
             }
 
         }
@@ -44,7 +44,6 @@ namespace Quartz.Net.Demo
             _dicCookie.Clear();
             _dicClassID.Clear();
             _dicSucClass.Clear();
-            DateTime _now = DateTime.Now;
             ClockInEntity Db = new ClockInEntity();
             IEnumerable<ClockBatch> allData = (from r in Db.ClockBatch
                                                where r.flag == true
@@ -67,9 +66,9 @@ namespace Quartz.Net.Demo
                     //该班失败的次数大于成功的次数 会停止该班的打卡
                     _dicSucClass.TryGetValue(model.ClassName, out int b);
                     if (b <= 0) continue;
-                    if (model.StartClockTime == null || _now.Subtract(Convert.ToDateTime(model.LastClockTime)).TotalHours < 1)
+                    if (model.StartClockTime == null || DateTime.Now.Subtract(Convert.ToDateTime(model.LastClockTime)).TotalHours < 1)
                         continue;
-                    if (DateTime.Parse(Convert.ToDateTime(model.StartClockTime.ToString()).ToShortTimeString()).TimeOfDay > _now.TimeOfDay)
+                    if (DateTime.Parse(Convert.ToDateTime(model.StartClockTime.ToString()).ToShortTimeString()).TimeOfDay > DateTime.Now.TimeOfDay)
                         continue;
 
                     ClassName = System.Text.RegularExpressions.Regex.Replace(model.ClassName, @"[^0-9]+", "");
@@ -95,8 +94,8 @@ namespace Quartz.Net.Demo
                         studentsList = studentsJson["data"]["classes"].AsEnumerable();
                         foreach (var item in studentsList)
                         {
-                            //找到班级名称对应的班级ID 放入班级ID字典  从右边取10个字符，然后正则取纯数字。OS：我是被逼的
-                            if (ClassName.Equals(Regex.Replace(item["tname"].ToString().Remove(0, item["tname"].ToString().Length - 10), @"[^0-9]+", "")))
+                            //找到班级名称对应的班级ID 放入班级ID字典  删除“2019”再做数字匹配
+                            if (ClassName.Equals(Regex.Replace(item["tname"].ToString().Replace("2019",""), @"[^0-9]+", "")))
                             {
                                 if (!_dicClassID.ContainsKey(model.ClassName))
                                 {
@@ -107,7 +106,7 @@ namespace Quartz.Net.Demo
                         }
                         if (!_dicClassID.ContainsKey(model.ClassName))
                         {
-                            logger.Warn($"打卡失败，请该工号{model.CardId}是否在该班级");
+                            logger.Info($"打卡失败，请该工号{model.CardId}是否在该班级");
                             _dicSucClass[model.ClassName]--;
                             continue;
                         }
@@ -137,10 +136,12 @@ namespace Quartz.Net.Demo
                             Db.Entry<ClockBatch>(model).State = EntityState.Modified;
                             Db.SaveChanges();
                             _dicSucClass[model.ClassName]++; //此次操作成功次数
-                            Thread.Sleep(new Random().Next(3000, 6000));
+                            Thread.Sleep(new Random().Next(1000, 5000));
                         }
                         else if ((strResult2.Contains("已签")))
                         {
+                            if (DateTime.Now.Subtract(Convert.ToDateTime(model.LastClockTime)).TotalHours > 0.5)
+                                model.Times++;
                             model.LastClockTime = DateTime.Now;
                             model.ClockState = true;
                             model.FailedReason += JObject.Parse(response2)["msg"].ToString() + DateTime.Now.ToString();
@@ -176,7 +177,7 @@ namespace Quartz.Net.Demo
             }
             catch (Exception ex)
             {
-                logger.Error(ex);
+                logger.Fatal(ex);
             }
         }
         /// <summary>

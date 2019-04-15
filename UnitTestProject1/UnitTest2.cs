@@ -31,6 +31,13 @@ namespace UnitTestProject1
             ClockBatchGo111111111111();
         }
 
+        [TestMethod]
+        public void TestMethod222()
+        {
+            new ClockGo().Main();
+        }
+        
+
         public void ClockBatchGo111111111111()
         {
 
