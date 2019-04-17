@@ -3,6 +3,7 @@ using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Configuration;
 using System.Data.Entity;
+using System.Diagnostics;
 using System.Globalization;
 using System.IO;
 using System.Linq;
@@ -10,6 +11,7 @@ using System.Net;
 using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading;
+using System.Threading.Tasks;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Newtonsoft.Json.Linq;
 using Quartz.Net.Demo;
@@ -34,7 +36,34 @@ namespace UnitTestProject1
         [TestMethod]
         public void TestMethod222()
         {
-            new ClockGo().Main();
+            List<int> lint = new List<int> { };
+            List<int> resint = new List<int> { };
+            for (int i = 0; i < 50; i++)
+            {
+                lint.Add(i);
+            }
+            Stopwatch a = new Stopwatch();
+            a.Start();
+            Parallel.ForEach(lint, new ParallelOptions() { MaxDegreeOfParallelism = 5 }, (item, state) =>
+                 {
+                     if (item > 30 && item < 40)
+                     {
+                         return;
+                     }
+                     if (item > 25 && item < 28)
+                     {
+                         return;
+                     }
+                     if (item > 95)
+                     {
+                         return;
+                     }
+                     resint.Add(item);
+                     Thread.Sleep(1000);
+                 });
+            a.Stop();
+            var time = a.ElapsedMilliseconds;
+            Console.ReadKey();
         }
         
 

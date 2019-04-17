@@ -54,3 +54,4 @@ F:\GitHub\WebClockOnService\Quartz.Net.Demo\obj\Debug\Quartz.Net.Demo.pdb
 F:\GitHub\WebClockOnService\Quartz.Net.Demo\bin\Debug\Quartz.Net.Demo.dll.config
 F:\GitHub\WebClockOnService\Quartz.Net.Demo\bin\Debug\Quartz.Net.Demo.dll
 F:\GitHub\WebClockOnService\Quartz.Net.Demo\obj\Debug\Quartz.Net.Demo.dll
+F:\GitHub\WebClockOnService\Quartz.Net.Demo\obj\Debug\Quartz.Net.Demo.csprojAssemblyReference.cache

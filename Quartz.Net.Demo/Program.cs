@@ -14,7 +14,7 @@ namespace Quartz.Net.Demo
             try
             {
 
-            //new ClockGo().Main();
+            new ClockGo().Main();
             //new ClockBatchDetail().ClockBatchGo();
             }
             catch (Exception ex )

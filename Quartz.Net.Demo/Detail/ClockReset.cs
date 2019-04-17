@@ -24,6 +24,7 @@ namespace Quartz.Net.Demo
                 {
                     entity.ClockStateAM = false;
                     entity.ClockStatePM = false;
+                    entity.FailReason += DateTime.Now.ToString();
                 });
             // 所有的过期用户flag改为False
             Parallel.ForEach(toUpdates.Where(

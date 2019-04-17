@@ -280,6 +280,7 @@ namespace WebMVC.Controllers
                     if (model1.CreatTime.AddDays(model1.TotalDays).Subtract(now).Days <= 0)
                         continue;
                     model1.flag = model1.flag ? false : true;//暂停或者恢复正常
+                    model1.FailReason += (model1.flag ? "启用" : "禁用") + DateTime.Now.ToString();
                     Db.ClockModels.Attach(model1);
                     Db.Entry<ClockModels>(model1).State = EntityState.Modified;
                 }

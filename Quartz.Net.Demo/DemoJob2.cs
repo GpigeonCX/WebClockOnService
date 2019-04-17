@@ -16,13 +16,13 @@ namespace Quartz.Net.Demo
         {
             try
             {
-                logger.Info("开始  每天定时（默认0点）清理所有打卡状态数据及过期用户！！！ ClockReset().Reset() ");
+                logger.Info("开始  每天定时（默认0点）清理所有打卡状态数据及过期用户！！！ ClockReset().Reset() "+ DateTime.Now);
                 new ClockReset().Reset();
-                logger.Info("成功！每天定时（默认0点）清理所有打卡状态数据及过期用户完成！！！ ClockReset().Reset()");
+                logger.Info("成功！每天定时（默认0点）清理所有打卡状态数据及过期用户完成！！！ ClockReset().Reset()"+ DateTime.Now);
             }
             catch (Exception ex)
             {
-                logger.Fatal("每天定时（默认0点）清理所有打卡状态数据及过期用户   运行异常 ClockReset().Reset()", ex);
+                logger.Fatal("每天定时（默认0点）清理所有打卡状态数据及过期用户   运行异常 ClockReset().Reset()"+ DateTime.Now, ex);
             }
 
         }

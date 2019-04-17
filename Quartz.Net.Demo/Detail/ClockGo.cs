@@ -51,7 +51,7 @@ namespace Quartz.Net.Demo
                             r.NeedSun,//周日打卡
                             r.FailReason
                         };
-            foreach (var item in data1.ToList().OrderBy(p => Guid.NewGuid()))
+            foreach (var item in data1.OrderBy(p => Guid.NewGuid()))
             {
                 //判断当前用户“今天”需不需要打卡
                 if ((item.NeedSta && isSta) || (item.NeedSun && isSun) || (!isSta && !isSun))
@@ -73,7 +73,7 @@ namespace Quartz.Net.Demo
                         }
                         catch (Exception ex)
                         {
-                            Cloc.FailReason = Unicode2String(result).ToString() + "JSON解析错误";
+                            Cloc.FailReason += Unicode2String(result).ToString() + "JSON解析错误" + DateTime.Now.ToString();
                             if (Unicode2String(result).Contains("0"))   //网站是通过CODE=0 来判断是否成功
                             {
                                 Cloc.LastClockTime = DateTime.Now;
@@ -91,11 +91,11 @@ namespace Quartz.Net.Demo
                             Db.Entry<ClockModels>(Cloc).State = System.Data.Entity.EntityState.Modified;
                             //一次性 生成sql语句到数据库执行            
                             Db.SaveChanges();
-                            Thread.Sleep(1000);
+                            Thread.Sleep(300);
                         }
                         else
                         {
-                            Cloc.FailReason = StrJson.ToString();
+                            Cloc.FailReason += StrJson.ToString() + DateTime.Now.ToString();
                             Db.Entry<ClockModels>(Cloc).State = System.Data.Entity.EntityState.Modified;
                             Db.SaveChanges();
                         }
@@ -116,7 +116,7 @@ namespace Quartz.Net.Demo
                         }
                         catch (Exception ex)
                         {
-                            Cloc.FailReason = Unicode2String(result).ToString() + "JSON解析错误";
+                            Cloc.FailReason += Unicode2String(result).ToString() + "JSON解析错误" + DateTime.Now.ToString();
                             if (Unicode2String(result).Contains("0"))   //网站是通过CODE=0 来判断是否成功
                             {
                                 Cloc.LastClockTime = DateTime.Now;
@@ -133,11 +133,11 @@ namespace Quartz.Net.Demo
                             Cloc.FailReason = null;
                             Db.Entry<ClockModels>(Cloc).State = System.Data.Entity.EntityState.Modified;
                             Db.SaveChanges();
-                            Thread.Sleep(500);
+                            Thread.Sleep(300);
                         }
                         else
                         {
-                            Cloc.FailReason = StrJson.ToString();
+                            Cloc.FailReason += StrJson.ToString() + DateTime.Now.ToString();
                             Db.Entry<ClockModels>(Cloc).State = System.Data.Entity.EntityState.Modified;
                             Db.SaveChanges();
                         }
