@@ -11,7 +11,6 @@ using System.Net;
 using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading;
-using System.Threading.Tasks;
 
 namespace Quartz.Net.Demo
 {
@@ -23,11 +22,11 @@ namespace Quartz.Net.Demo
         {
             try
             {
-                logger.Info("开始检查是否有需要打卡的用户，并准备开始打卡！ClockBatchGo() " + DateTime.Now);
+                logger.Info("开始检查是否有需要打卡的用户，并准备开始打卡！ClockBatchGo() ");
 
                 ClockBatchGo();
 
-                logger.Info("已完成当前时间需要打卡的所有用户的打卡操作，等待下一次检查！ClockBatchGo() " + DateTime.Now);
+                logger.Info("已完成当前时间需要打卡的所有用户的打卡操作，等待下一次检查！ClockBatchGo() ");
             }
             catch (Exception ex)
             {
@@ -40,7 +39,6 @@ namespace Quartz.Net.Demo
         private static System.Collections.Concurrent.ConcurrentDictionary<string, int> _dicSucClass = new System.Collections.Concurrent.ConcurrentDictionary<string, int>();
         private static readonly string posturl1 = ConfigurationManager.ConnectionStrings["PostUrl1"].ConnectionString;
         private static readonly string posturl2 = ConfigurationManager.ConnectionStrings["PostUrl2"].ConnectionString;
-        private static readonly string ThreadCount = ConfigurationManager.ConnectionStrings["ThreadCount"].ConnectionString;
         public void ClockBatchGo()
         {
             _dicCookie.Clear();
@@ -61,129 +59,133 @@ namespace Quartz.Net.Demo
             var temp = allData.GroupBy(x => x.ClassName).Select(g => new { g.Key }).ToList();
             List<string> allClass = new List<string>();
             temp.ForEach(x => _dicSucClass.TryAdd(x.Key, 2));
-            int thread = int.TryParse(ThreadCount, out int count) ? count : 3;
             try
             {
-                Parallel.ForEach(allData.OrderBy(P => Guid.NewGuid()), new ParallelOptions() { MaxDegreeOfParallelism = thread }, (model, state) =>
-                 {
-                     try
-                     {
-                     //该班失败的次数大于成功的次数 会停止该班的打卡
-                     _dicSucClass.TryGetValue(model.ClassName, out int b);
-                     if (b <= 0)   return;
-                     if (model.StartClockTime == null || DateTime.Now.Subtract(Convert.ToDateTime(model.LastClockTime)).TotalHours < 1)
-                         return;
-                     if (DateTime.Parse(Convert.ToDateTime(model.StartClockTime.ToString()).ToShortTimeString()).TimeOfDay > DateTime.Now.TimeOfDay)
-                         return;
-                     ClassName = System.Text.RegularExpressions.Regex.Replace(model.ClassName, @"[^0-9]+", "");
-                     var response1 = HttpPost(posturl1, "idcard=" + model.CardId);
-                     strResult1 = Unicode2String(response1);//正常字符串结果
-                     if (strResult1.Contains("第一步成功"))
-                     {
-                         try
-                         {
-                             studentsJson = JObject.Parse(response1);
-                         }
-                         catch (Exception ex)
-                         {
-                             logger.Warn($"第一步网站JSON返回解析错误{strResult1}");
-                             model.ClockState = false;
-                             model.FailedReason += strResult1 + DateTime.Now;
-                             Db.ClockBatch.Attach(model);
-                             Db.Entry<ClockBatch>(model).State = EntityState.Modified;
-                             Db.SaveChanges();
-                             _dicSucClass[model.ClassName]--;
-                             return;
-                         }
-                         studentsList = studentsJson["data"]["classes"].AsEnumerable();
-                         foreach (var item in studentsList)
-                         {
-                             //找到班级名称对应的班级ID 放入班级ID字典  删除“2019”再做数字匹配
-                             if (ClassName.Equals(Regex.Replace(item["tname"].ToString().Replace("2019", ""), @"[^0-9]+", "")))
-                             {
-                                 if (!_dicClassID.ContainsKey(model.ClassName))
-                                 {
-                                     _dicClassID.TryAdd(model.ClassName, item["id"].ToString());//key用model.ClassName是因为有：不同老师的班，但是数字相同的情况
-                                     break;
-                                 }
-                             };
-                         }
-                         if (!_dicClassID.ContainsKey(model.ClassName))
-                         {
-                             logger.Info($"打卡失败，请该工号{model.CardId}是否在该班级");
-                             _dicSucClass[model.ClassName]--;
-                             return;
-                         }
+                foreach (var model in allData.OrderBy(P => Guid.NewGuid()))
+                {
+                    try
+                    {
+                    //该班失败的次数大于成功的次数 会停止该班的打卡
+                    _dicSucClass.TryGetValue(model.ClassName, out int b);
+                    if (b <= 0) continue;
+                    if (model.StartClockTime == null || DateTime.Now.Subtract(Convert.ToDateTime(model.LastClockTime)).TotalHours < 0.5)
+                        continue;
+                    if (DateTime.Parse(Convert.ToDateTime(model.StartClockTime.ToString()).ToShortTimeString()).TimeOfDay > DateTime.Now.TimeOfDay)
+                        continue;
 
-                         var response2 = HttpPost(posturl2, "class_id=" + _dicClassID[model.ClassName]
-                          , new Dictionary<string, string>()
-                          {
+                    ClassName = System.Text.RegularExpressions.Regex.Replace(model.ClassName, @"[^0-9]+", "");
+                    var response1 = HttpPost(posturl1, "idcard=" + model.CardId);
+                    strResult1 = Unicode2String(response1);//正常字符串结果
+                    if (strResult1.Contains("第一步成功"))
+                    {
+                        try
+                        {
+                            studentsJson = JObject.Parse(response1);
+                        }
+                        catch (Exception ex)
+                        {
+                            logger.Warn($"第一步网站JSON返回解析错误{strResult1}");
+                            model.ClockState = false;
+                            model.FailedReason += strResult1 + DateTime.Now;
+                            Db.ClockBatch.Attach(model);
+                            Db.Entry<ClockBatch>(model).State = EntityState.Modified;
+                            Db.SaveChanges();
+                            _dicSucClass[model.ClassName]--;
+                            continue;
+                        }
+                        studentsList = studentsJson["data"]["classes"].AsEnumerable();
+                        if (!_dicClassID.ContainsKey(model.ClassName))
+                        {
+                            foreach (var item in studentsList)
+                            {
+                                //找到班级名称对应的班级ID 放入班级ID字典  删除“2019”再做数字匹配
+                                if (ClassName.Equals(Regex.Replace(item["tname"].ToString().Replace("2019", ""), @"[^0-9]+", "")))
+                                {
+
+                                    _dicClassID.TryAdd(model.ClassName, item["id"].ToString());//key用model.ClassName是因为有：不同老师的班，但是数字相同的情况
+                                    break;
+
+                                };
+                            }
+                        }
+                        if (!_dicClassID.ContainsKey(model.ClassName))
+                        {
+                            model.FailedReason += $"打卡失败，请该工号{model.CardId}是否在该班级";
+                            Db.ClockBatch.Attach(model);
+                            Db.Entry<ClockBatch>(model).State = EntityState.Modified;
+                            Db.SaveChanges();
+                            _dicSucClass[model.ClassName]--;
+                            continue;
+                        }
+
+                        var response2 = HttpPost(posturl2, "class_id=" + _dicClassID[model.ClassName]
+                         , new Dictionary<string, string>()
+                         {
                             { "cookie", _dicCookie[string.Format("idcard={0}",model.CardId)] }
-                          });
-                         try
-                         {
-                             strResult2 = JObject.Parse(response2).ToString();
-                         }
-                         catch (Exception)
-                         {
-                             logger.Warn($"第二步网站JSON返回解析错误{Unicode2String(response2)}");
-                             _dicSucClass[model.ClassName]--;
-                             return;
-                         }
-                         if (strResult2.Contains("成功"))
-                         {
-                             model.LastClockTime = DateTime.Now;
-                             model.ClockState = true;
-                             model.FailedReason = "";
-                             model.Times++;
-                             Db.ClockBatch.Attach(model);
-                             Db.Entry<ClockBatch>(model).State = EntityState.Modified;
-                             Db.SaveChanges();
-                             _dicSucClass[model.ClassName]++; //此次操作成功次数
-                             Thread.Sleep(new Random().Next(2000, 5000));
-                         }
-                         else if ((strResult2.Contains("已签")))
-                         {
-                             if (DateTime.Now.Subtract(Convert.ToDateTime(model.LastClockTime)).TotalHours > 0.5)
-                                 model.Times++;
-                             model.LastClockTime = DateTime.Now;
-                             model.ClockState = true;
-                             model.FailedReason += JObject.Parse(response2)["msg"].ToString() + DateTime.Now.ToString();
-                             Db.ClockBatch.Attach(model);
-                             Db.Entry<ClockBatch>(model).State = EntityState.Modified;
-                             Db.SaveChanges();
-                             _dicSucClass[model.ClassName]++; //此次操作成功次数
-                         }
-                         else
-                         {
-                             model.ClockState = false;
-                             model.FailedReason += JObject.Parse(response2)["msg"].ToString() + DateTime.Now.ToString();
-                             Db.ClockBatch.Attach(model);
-                             Db.Entry<ClockBatch>(model).State = EntityState.Modified;
-                             Db.SaveChanges();
-                             //_dicSucClass.TryRemove(model.ClassName, out int aa);
-                             _dicSucClass[model.ClassName]--;
+                         });
+                        try
+                        {
+                            strResult2 = JObject.Parse(response2).ToString();
+                        }
+                        catch (Exception)
+                        {
+                            logger.Warn($"第二步网站JSON返回解析错误{Unicode2String(response2)}");
+                            _dicSucClass[model.ClassName]--;
+                            continue;
+                        }
+                        if (strResult2.Contains("成功"))
+                        {
+                            model.LastClockTime = DateTime.Now;
+                            model.ClockState = true;
+                            model.FailedReason = "";
+                            model.Times++;
+                            Db.ClockBatch.Attach(model);
+                            Db.Entry<ClockBatch>(model).State = EntityState.Modified;
+                            Db.SaveChanges();
+                            _dicSucClass[model.ClassName]++; //此次操作成功次数
+                            Thread.Sleep(new Random().Next(500, 1001));
+                        }
+                        else if ((strResult2.Contains("已签")))
+                        {
+                            if (DateTime.Now.Subtract(Convert.ToDateTime(model.LastClockTime)).TotalHours > 0.5)
+                                model.Times++;
+                            model.LastClockTime = DateTime.Now;
+                            model.ClockState = true;
+                            model.FailedReason += JObject.Parse(response2)["msg"].ToString() + DateTime.Now.ToString();
+                            Db.ClockBatch.Attach(model);
+                            Db.Entry<ClockBatch>(model).State = EntityState.Modified;
+                            Db.SaveChanges();
+                            _dicSucClass[model.ClassName]++; //此次操作成功次数
+                        }
+                        else
+                        {
+                            model.ClockState = false;
+                            model.FailedReason += JObject.Parse(response2)["msg"].ToString() + DateTime.Now.ToString();
+                            Db.ClockBatch.Attach(model);
+                            Db.Entry<ClockBatch>(model).State = EntityState.Modified;
+                            Db.SaveChanges();
+                            //_dicSucClass.TryRemove(model.ClassName, out int aa);
+                            _dicSucClass[model.ClassName]--;
 
-                         }
-                     }
-                     else
-                     {
-                         model.ClockState = false;
-                         model.FailedReason += strResult1 + DateTime.Now;
-                         Db.ClockBatch.Attach(model);
-                         Db.Entry<ClockBatch>(model).State = EntityState.Modified;
-                         Db.SaveChanges();
-                         //_dicSucClass.TryRemove(model.ClassName, out bool bb);
-                         _dicSucClass[model.ClassName]--;
-                     }
-                     }
-                     catch (Exception ex)
-                     {
-                         logger.Fatal(ex);
-                         return;
-                     }
-
-                 });
+                        }
+                    }
+                    else
+                    {
+                        model.ClockState = false;
+                        model.FailedReason += strResult1 + DateTime.Now;
+                        Db.ClockBatch.Attach(model);
+                        Db.Entry<ClockBatch>(model).State = EntityState.Modified;
+                        Db.SaveChanges();
+                        //_dicSucClass.TryRemove(model.ClassName, out bool bb);
+                        _dicSucClass[model.ClassName]--;
+                    }
+                    }
+                    catch (Exception ex)
+                    {
+                        logger.Fatal($"遍历内部错误，错误工号{model.CardId}错误信息{ex}，已continue，继续下一个打卡用户！！！！预期外的错误！！！！{DateTime.Now.ToString()}");
+                        continue;
+                    }
+                }
             }
             catch (Exception ex)
             {
