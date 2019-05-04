@@ -373,6 +373,7 @@ namespace WebMVC.Controllers
                 {
                     if (model == null) continue;
                     //默认数据
+                    model.CardId = model.CardId.Trim();
                     model.CreatTime = DateTime.Now;
                     model.LastClockTime = Convert.ToDateTime("2000-1-1 00:00");
                     model.ClockStateAM = false;
