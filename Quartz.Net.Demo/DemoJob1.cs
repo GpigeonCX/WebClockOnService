@@ -4,7 +4,7 @@ using System;
 namespace Quartz.Net.Demo
 {
     /// <summary>
-    /// 实现IJob接口
+    /// 实现JOB
     /// </summary>
     public class DemoJob1 : IJob
     {

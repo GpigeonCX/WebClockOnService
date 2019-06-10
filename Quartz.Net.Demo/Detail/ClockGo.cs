@@ -23,6 +23,26 @@ namespace Quartz.Net.Demo
         private static readonly string PostURL = ConfigurationManager.ConnectionStrings["PostURL"].ConnectionString;
         private static readonly Common.Logging.ILog logger = Common.Logging.LogManager.GetLogger(System.Reflection.MethodBase.GetCurrentMethod().DeclaringType);
 
+        private static int span;
+        private static int SleepSpan
+        {
+            get
+            {
+                if (span == 0)
+                {
+                    if (int.TryParse(ConfigurationManager.ConnectionStrings["SleepSpan"].ConnectionString, out span))
+                    {
+                        return span;
+                    }
+                    return span = 300;
+
+                }
+                return span;
+            }
+            set { }
+        }
+
+
         //private string str = HttpPost(@"http://203.160.52.218:810/log.php", "gh=320821611303161");
         public void Main()
         {
@@ -32,6 +52,9 @@ namespace Quartz.Net.Demo
             List<ClockModels> models = new List<ClockModels>();
             bool isSta = _now.DayOfWeek.ToString() == "Saturday";
             bool isSun = _now.DayOfWeek.ToString() == "Sunday";
+            if (Int32.Parse(_now.ToString("HH")) >= 6 && Int32.Parse(_now.ToString("HH")) <= 9)
+                SleepSpan = 500;
+            int erro = 0;
             JObject StrJson;
             IEnumerable<JToken> JsonListcode;
             IEnumerable<JToken> JsonListmsg;
@@ -55,252 +78,111 @@ namespace Quartz.Net.Demo
                         };
             foreach (var item in data1.OrderBy(p => Guid.NewGuid()))
             {
-                //判断当前用户“今天”需不需要打卡
-                if ((item.NeedSta && isSta) || (item.NeedSun && isSun) || (!isSta && !isSun))
+                try
                 {
-                    //判断“现在”是不是该用户打上班卡的时间
-                    if (getTimeSpan(item.OnTimeStart, item.OnTimeEnd) && !item.ClockStateAM)
+                    //判断当前用户“今天”需不需要打卡
+                    if ((item.NeedSta && isSta) || (item.NeedSun && isSun) || (!isSta && !isSun))
                     {
-                        result = HttpPost(PostURL, "user=" + item.CardId + "&pass=" + item.PassWord);
+                        //判断“现在”是不是该用户打上班卡的时间
+                        if (getTimeSpan(item.OnTimeStart, item.OnTimeEnd) && !item.ClockStateAM)
+                        {
+                            result = HttpPost(PostURL, "user=" + item.CardId + "&pass=" + item.PassWord);
 
-                        var Cloc = (from r in Db.ClockModels
-                                    where r.CardId == item.CardId
-                                    select r).FirstOrDefault();
-                        //网站有返回不规范情况
-                        try
-                        {
-                            StrJson = JObject.Parse(result);
-                            JsonListcode = StrJson["code"].AsEnumerable();
-                            JsonListmsg = StrJson["msg"].AsEnumerable();
-                        }
-                        catch (Exception ex)
-                        {
-                            Cloc.FailReason += Unicode2String(result).ToString() + "JSON解析错误" + DateTime.Now.ToString();
-                            if (Unicode2String(result).Contains("0"))   //网站是通过CODE=0 来判断是否成功
+                            var Cloc = (from r in Db.ClockModels
+                                        where r.CardId == item.CardId
+                                        select r).FirstOrDefault();
+                            //网站有返回不规范情况
+                            try
+                            {
+                                StrJson = JObject.Parse(result);
+                                JsonListcode = StrJson["code"].AsEnumerable();
+                                JsonListmsg = StrJson["msg"].AsEnumerable();
+                            }
+                            catch (Exception ex)
+                            {
+                                logger.Error($"工号id{item.CardId}打卡出错：{ex}");
+                                Cloc.FailReason += Unicode2String(result).ToString() + "JSON解析错误" + DateTime.Now.ToString();
+                                if (Unicode2String(result).Contains("0"))   //网站是通过CODE=0 来判断是否成功
+                                {
+                                    Cloc.LastClockTime = DateTime.Now;
+                                    Cloc.ClockStateAM = true;
+                                }
+                                Db.Entry<ClockModels>(Cloc).State = System.Data.Entity.EntityState.Modified;
+                                Db.SaveChanges();
+                                continue;
+                            }
+                            if (JsonListcode.ToString().Contains("0"))
                             {
                                 Cloc.LastClockTime = DateTime.Now;
                                 Cloc.ClockStateAM = true;
+                                Cloc.FailReason = null;
+                                Db.Entry<ClockModels>(Cloc).State = System.Data.Entity.EntityState.Modified;
+                                //一次性 生成sql语句到数据库执行            
+                                Db.SaveChanges();
+                                Thread.Sleep(SleepSpan);
                             }
-                            Db.Entry<ClockModels>(Cloc).State = System.Data.Entity.EntityState.Modified;
-                            Db.SaveChanges();
-                            continue;
+                            else
+                            {
+                                Cloc.FailReason += StrJson.ToString() + DateTime.Now.ToString();
+                                Db.Entry<ClockModels>(Cloc).State = System.Data.Entity.EntityState.Modified;
+                                Db.SaveChanges();
+                            }
                         }
-                        if (JsonListcode.ToString().Contains("0"))
+                        //判断“现在”是不是该用户打下班卡的时间
+                        if (getTimeSpan(item.OffTimeStart, item.OffTimeEnd) && !item.ClockStatePM)
                         {
-                            Cloc.LastClockTime = DateTime.Now;
-                            Cloc.ClockStateAM = true;
-                            Cloc.FailReason = null;
-                            Db.Entry<ClockModels>(Cloc).State = System.Data.Entity.EntityState.Modified;
-                            //一次性 生成sql语句到数据库执行            
-                            Db.SaveChanges();
-                            Thread.Sleep(300);
-                        }
-                        else
-                        {
-                            Cloc.FailReason += StrJson.ToString() + DateTime.Now.ToString();
-                            Db.Entry<ClockModels>(Cloc).State = System.Data.Entity.EntityState.Modified;
-                            Db.SaveChanges();
-                        }
-                    }
-                    //判断“现在”是不是该用户打下班卡的时间
-                    if (getTimeSpan(item.OffTimeStart, item.OffTimeEnd) && !item.ClockStatePM)
-                    {
-                        result = HttpPost(PostURL, "user=" + item.CardId + "&pass=" + item.PassWord);
-                        var Cloc = (from r in Db.ClockModels
-                                    where r.CardId == item.CardId
-                                    select r).FirstOrDefault();
-                        //网站有返回不规范情况
-                        try
-                        {
-                            StrJson = JObject.Parse(result);
-                            JsonListcode = StrJson["code"].AsEnumerable();
-                            JsonListmsg = StrJson["msg"].AsEnumerable();
-                        }
-                        catch (Exception ex)
-                        {
-                            Cloc.FailReason += Unicode2String(result).ToString() + "JSON解析错误" + DateTime.Now.ToString();
-                            if (Unicode2String(result).Contains("0"))   //网站是通过CODE=0 来判断是否成功
+                            result = HttpPost(PostURL, "user=" + item.CardId + "&pass=" + item.PassWord);
+                            var Cloc = (from r in Db.ClockModels
+                                        where r.CardId == item.CardId
+                                        select r).FirstOrDefault();
+                            //网站有返回不规范情况
+                            try
+                            {
+                                StrJson = JObject.Parse(result);
+                                JsonListcode = StrJson["code"].AsEnumerable();
+                                JsonListmsg = StrJson["msg"].AsEnumerable();
+                            }
+                            catch (Exception ex)
+                            {
+                                logger.Error($"工号id{item.CardId}打卡出错：{ex}");
+                                Cloc.FailReason += Unicode2String(result).ToString() + "JSON解析错误" + DateTime.Now.ToString();
+                                if (Unicode2String(result).Contains("0"))   //网站是通过CODE=0 来判断是否成功
+                                {
+                                    Cloc.LastClockTime = DateTime.Now;
+                                    Cloc.ClockStatePM = true;
+                                }
+                                Db.Entry<ClockModels>(Cloc).State = System.Data.Entity.EntityState.Modified;
+                                Db.SaveChanges();
+                                continue;
+                            }
+                            if (JsonListcode.ToString().Contains("0"))
                             {
                                 Cloc.LastClockTime = DateTime.Now;
                                 Cloc.ClockStatePM = true;
+                                Cloc.FailReason = null;
+                                Db.Entry<ClockModels>(Cloc).State = System.Data.Entity.EntityState.Modified;
+                                Db.SaveChanges();
+                                Thread.Sleep(SleepSpan);
                             }
-                            Db.Entry<ClockModels>(Cloc).State = System.Data.Entity.EntityState.Modified;   
-                            Db.SaveChanges();
-                            continue;
-                        }
-                        if (JsonListcode.ToString().Contains("0"))
-                        {
-                            Cloc.LastClockTime = DateTime.Now;
-                            Cloc.ClockStatePM = true;
-                            Cloc.FailReason = null;
-                            Db.Entry<ClockModels>(Cloc).State = System.Data.Entity.EntityState.Modified;
-                            Db.SaveChanges();
-                            Thread.Sleep(300);
-                        }
-                        else
-                        {
-                            Cloc.FailReason += StrJson.ToString() + DateTime.Now.ToString();
-                            Db.Entry<ClockModels>(Cloc).State = System.Data.Entity.EntityState.Modified;
-                            Db.SaveChanges();
+                            else
+                            {
+                                Cloc.FailReason += StrJson.ToString() + DateTime.Now.ToString();
+                                Db.Entry<ClockModels>(Cloc).State = System.Data.Entity.EntityState.Modified;
+                                Db.SaveChanges();
+                            }
                         }
                     }
                 }
-
+                catch (Exception ex)
+                {
+                    erro++;
+                    logger.Error($"此次错误次数{erro}，工号id{item.CardId}，打卡出错：{ex}");
+                    continue;
+                }
             }
         }
+
         //判断当前时间是否在工作时间段内
-        public void backup()
-        {
-            //_dicCookie.Clear();
-            //_dicClassID.Clear();
-            //_dicSucClass.Clear();
-            //ClockInEntity Db = new ClockInEntity();
-            //IEnumerable<ClockBatch> allData = (from r in Db.ClockBatch
-            //                                   where r.flag == true
-            //                                   select r).ToList();
-            ////.Where(r => _now.Subtract(Convert.ToDateTime(r.LastClockTime)).TotalHours > 1);
-            ////.Where(r => _now.TimeOfDay.TotalHours-  Convert.ToDateTime(Convert.ToDateTime(r.LastClockTime).ToShortTimeString()).TimeOfDay.TotalHours > 1);
-            //var ClassName = "";
-            //JObject studentsJson = null;
-            //string strResult1 = "";
-            //string strResult2 = "";
-            //IEnumerable<JToken> studentsList;
-            ////获取所有班级
-            //var temp = allData.GroupBy(x => x.ClassName).Select(g => new { g.Key }).ToList();
-            //List<string> allClass = new List<string>();
-            //temp.ForEach(x => _dicSucClass.TryAdd(x.Key, 2));
-            //int thread = int.TryParse(ThreadCount, out int count) ? count : 3;
-            //try
-            //{
-            //    Parallel.ForEach(allData.OrderBy(P => Guid.NewGuid()), new ParallelOptions() { MaxDegreeOfParallelism = thread }, (model, state) =>
-            //    {
-            //        try
-            //        {
-            //            //该班失败的次数大于成功的次数 会停止该班的打卡
-            //            _dicSucClass.TryGetValue(model.ClassName, out int b);
-            //            if (b <= 0) return;
-            //            if (model.StartClockTime == null || DateTime.Now.Subtract(Convert.ToDateTime(model.LastClockTime)).TotalHours < 1)
-            //                return;
-            //            if (DateTime.Parse(Convert.ToDateTime(model.StartClockTime.ToString()).ToShortTimeString()).TimeOfDay > DateTime.Now.TimeOfDay)
-            //                return;
-            //            ClassName = System.Text.RegularExpressions.Regex.Replace(model.ClassName, @"[^0-9]+", "");
-            //            var response1 = HttpPost(posturl1, "idcard=" + model.CardId);
-            //            strResult1 = Unicode2String(response1);//正常字符串结果
-            //            if (strResult1.Contains("第一步成功"))
-            //            {
-            //                try
-            //                {
-            //                    studentsJson = JObject.Parse(response1);
-            //                }
-            //                catch (Exception ex)
-            //                {
-            //                    logger.Warn($"第一步网站JSON返回解析错误{strResult1}");
-            //                    model.ClockState = false;
-            //                    model.FailedReason += strResult1 + DateTime.Now;
-            //                    Db.ClockBatch.Attach(model);
-            //                    Db.Entry<ClockBatch>(model).State = EntityState.Modified;
-            //                    Db.SaveChanges();
-            //                    _dicSucClass[model.ClassName]--;
-            //                    return;
-            //                }
-            //                studentsList = studentsJson["data"]["classes"].AsEnumerable();
-            //                foreach (var item in studentsList)
-            //                {
-            //                    //找到班级名称对应的班级ID 放入班级ID字典  删除“2019”再做数字匹配
-            //                    if (ClassName.Equals(Regex.Replace(item["tname"].ToString().Replace("2019", ""), @"[^0-9]+", "")))
-            //                    {
-            //                        if (!_dicClassID.ContainsKey(model.ClassName))
-            //                        {
-            //                            _dicClassID.TryAdd(model.ClassName, item["id"].ToString());//key用model.ClassName是因为有：不同老师的班，但是数字相同的情况
-            //                            break;
-            //                        }
-            //                    };
-            //                }
-            //                if (!_dicClassID.ContainsKey(model.ClassName))
-            //                {
-            //                    model.FailedReason += $"打卡失败，请该工号{model.CardId}是否在该班级";
-            //                    Db.ClockBatch.Attach(model);
-            //                    Db.Entry<ClockBatch>(model).State = EntityState.Modified;
-            //                    Db.SaveChanges();
-            //                    _dicSucClass[model.ClassName]--;
-            //                    return;
-            //                }
-
-            //                var response2 = HttpPost(posturl2, "class_id=" + _dicClassID[model.ClassName]
-            //                 , new Dictionary<string, string>()
-            //                 {
-            //                { "cookie", _dicCookie[string.Format("idcard={0}",model.CardId)] }
-            //                 });
-            //                try
-            //                {
-            //                    strResult2 = JObject.Parse(response2).ToString();
-            //                }
-            //                catch (Exception)
-            //                {
-            //                    logger.Warn($"第二步网站JSON返回解析错误{Unicode2String(response2)}");
-            //                    _dicSucClass[model.ClassName]--;
-            //                    return;
-            //                }
-            //                if (strResult2.Contains("成功"))
-            //                {
-            //                    model.LastClockTime = DateTime.Now;
-            //                    model.ClockState = true;
-            //                    model.FailedReason = "";
-            //                    model.Times++;
-            //                    Db.ClockBatch.Attach(model);
-            //                    Db.Entry<ClockBatch>(model).State = EntityState.Modified;
-            //                    Db.SaveChanges();
-            //                    _dicSucClass[model.ClassName]++; //此次操作成功次数
-            //                    Thread.Sleep(new Random().Next(2000, 5000));
-            //                }
-            //                else if ((strResult2.Contains("已签")))
-            //                {
-            //                    if (DateTime.Now.Subtract(Convert.ToDateTime(model.LastClockTime)).TotalHours > 0.5)
-            //                        model.Times++;
-            //                    model.LastClockTime = DateTime.Now;
-            //                    model.ClockState = true;
-            //                    model.FailedReason += JObject.Parse(response2)["msg"].ToString() + DateTime.Now.ToString();
-            //                    Db.ClockBatch.Attach(model);
-            //                    Db.Entry<ClockBatch>(model).State = EntityState.Modified;
-            //                    Db.SaveChanges();
-            //                    _dicSucClass[model.ClassName]++; //此次操作成功次数
-            //                }
-            //                else
-            //                {
-            //                    model.ClockState = false;
-            //                    model.FailedReason += JObject.Parse(response2)["msg"].ToString() + DateTime.Now.ToString();
-            //                    Db.ClockBatch.Attach(model);
-            //                    Db.Entry<ClockBatch>(model).State = EntityState.Modified;
-            //                    Db.SaveChanges();
-            //                    //_dicSucClass.TryRemove(model.ClassName, out int aa);
-            //                    _dicSucClass[model.ClassName]--;
-
-            //                }
-            //            }
-            //            else
-            //            {
-            //                model.ClockState = false;
-            //                model.FailedReason += strResult1 + DateTime.Now;
-            //                Db.ClockBatch.Attach(model);
-            //                Db.Entry<ClockBatch>(model).State = EntityState.Modified;
-            //                Db.SaveChanges();
-            //                //_dicSucClass.TryRemove(model.ClassName, out bool bb);
-            //                _dicSucClass[model.ClassName]--;
-            //            }
-            //        }
-            //        catch (Exception ex)
-            //        {
-            //            logger.Fatal(ex);
-            //            return;
-            //        }
-
-            //    });
-            //}
-            //catch (Exception ex)
-            //{
-            //    logger.Fatal(ex);
-            //}
-        }
         protected bool getTimeSpan(string _strWorkingDayAM, string _strWorkingDayPM)
         {
             TimeSpan dspWorkingDayAM = DateTime.Parse(_strWorkingDayAM).TimeOfDay;
@@ -358,7 +240,9 @@ namespace Quartz.Net.Demo
                 }
             }
             catch (Exception ex)
-            { }
+            {
+                logger.Error($"POST方法出错：{ex}参数:{headerDic.ToString()}");
+            }
 
             return result;
         }
