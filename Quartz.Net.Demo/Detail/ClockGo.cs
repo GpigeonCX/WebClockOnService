@@ -34,7 +34,7 @@ namespace Quartz.Net.Demo
                     {
                         return span;
                     }
-                    return span = 300;
+                    return span = 100;
 
                 }
                 return span;
@@ -42,8 +42,7 @@ namespace Quartz.Net.Demo
             set { }
         }
 
-
-        //private string str = HttpPost(@"http://203.160.52.218:810/log.php", "gh=320821611303161");
+        
         public void Main()
         {
             ClockInEntity Db = new ClockInEntity();
