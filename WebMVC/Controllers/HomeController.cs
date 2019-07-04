@@ -49,15 +49,23 @@ namespace WebMVC.Controllers
                                 r.PassWord,
                             };
                 // ).Skip(pageSize * (pageIndex - 1)).Take(pageSize).ToList();
+                if (bool.TryParse((Request["Stop"]), out bool isStop))
+                    data1 = isStop ? data1.Where(r => r.flag == false) : data1;//没有选中给有所数据
+                if (!string.IsNullOrEmpty(Request["SuplDay"]) && int.TryParse(Request["SuplDay"], out int sday))
+                {
+                    data1 = isStop ? data1 : data1.Where(r => r.flag == true);
+                    sday = sday < 0 ? 0 : (sday > 30 ? 30 : sday);
+                    data1 = data1.Where(r => r.SurplusDay <= sday).OrderBy(da => da.SurplusDay);
+                }
                 if (!string.IsNullOrEmpty(Request["EmployeeName"]))
                     data1 = data1.Where(r => r.EmployeeName.Contains(Request["EmployeeName"].ToString().Trim()));
                 if (!string.IsNullOrEmpty(Request["CardId"]))
                     data1 = data1.Where(r => r.CardId.Equals(Request["CardId"].ToString().Trim()));
 
-                int total = Db.ClockModels.Count();//总条数
-                                                   //构造成Json的格式传递
+                int total = data1.Count();//总条数
+                                          //构造成Json的格式传递
 
-                var result = new { total = total, rows = data1.Skip(pageSize * (pageIndex - 1)).Take(pageSize) };
+                var result = new { total, rows = data1.Skip(pageSize * (pageIndex - 1)).Take(pageSize) };
 
                 return Json(result, JsonRequestBehavior.AllowGet);
                 #region 遗弃代码

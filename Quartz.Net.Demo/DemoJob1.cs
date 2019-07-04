@@ -6,6 +6,7 @@ namespace Quartz.Net.Demo
     /// <summary>
     /// 实现JOB
     /// </summary>
+    [DisallowConcurrentExecution]
     public class DemoJob1 : IJob
     {
         //使用Common.Logging.dll日志接口实现日志记录

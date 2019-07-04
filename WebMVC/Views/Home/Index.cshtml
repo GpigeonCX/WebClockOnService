@@ -243,7 +243,9 @@
                 //得到用户输入的参数
                 var queryData = {
                     EmployeeName: $("#txtUserNameSerach").val(),
-                    CardId: $("#txtCardIDSerach").val()
+                    CardId: $("#txtCardIDSerach").val(),
+                    Stop: $("#boxStop").prop("checked"),
+                    SuplDay: $("#txtSuplDay").val(),
                 };
                 //将值传递给initTable
                 initList(queryData);
@@ -363,6 +365,9 @@
                         <input type="text" class="easyui-validatebox" id="txtCardIDSerach" name="txtCardIDSerach" />&nbsp;
                         <label for="txtUserNameSerach">姓名：</label>
                         <input type="text" class="easyui-validatebox" id="txtUserNameSerach" name="txtUserNameSerach" />&nbsp;
+                        <label>停止 </label><input id="boxStop" type="checkbox" />&nbsp;
+                        <label>剩余天数小于：</label>
+                        <input id="txtSuplDay" type="text" style="width:30px"/>&nbsp;
                         <a href="#" class="easyui-linkbutton" iconcls="icon-search" id="btnSerach">搜索</a>
                         <a href="/TemplateFiles/信息导入模板.xls">信息导入模板下载</a>
                     </div>

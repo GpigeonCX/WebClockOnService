@@ -8,3 +8,6 @@ Ver 1.0.0.2
 Ver 1.0.0.3
 间隔时间支持配置
 
+Ver 1.0.0.4
+job1增加DisallowConcurrentExecution特性，不允许该job并发执行
+
