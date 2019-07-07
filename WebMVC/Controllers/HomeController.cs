@@ -435,6 +435,101 @@ namespace WebMVC.Controllers
             // return File(urlPath, "text/plain");
             return Json(urlPath, JsonRequestBehavior.AllowGet); //File(urlPath, "text/plain", "ceshi.xls"); //welcome.txt是客户端保存的名字
         }
+
+        /// <summary>
+        /// 批量设置周六周日员工
+        /// </summary>
+        /// <returns></returns>
+        public ActionResult UploadBatchExcel()
+        {
+            int count = 0;
+            StringBuilder failCadID = new StringBuilder();
+            StringBuilder errorMsg = new StringBuilder(); // 错误信息
+            try
+            {
+                #region 1.获取Excel文件并转换为一个List集合
+
+                // 1.1存放Excel文件到本地服务器
+                HttpPostedFile filePost = System.Web.HttpContext.Current.Request.Files[0];
+                string filePath = ExcelHelper.SaveExcelFile(filePost); // 保存文件并获取文件路径
+
+                // 单元格抬头
+                // key：实体对象属性名称，可通过反射获取值
+                // value：属性对应的中文注解
+                Dictionary<string, string> cellheader = new Dictionary<string, string> {
+                    { "CardId", "工号" },
+                    { "NeedSta","周六"},
+                    { "NeedSun","周日"}
+                };
+
+                // 1.2解析文件，存放到一个List集合里
+                List<ClockModels> enlist = ExcelHelper.ExcelToEntityList<ClockModels>(cellheader, filePath, out errorMsg);
+                if (errorMsg.Length != 0) return Json($"excel格式不对，请使用模板格式导入！！《预期内的错误》");
+                #endregion
+                // 获取所有数据
+                IEnumerable<ClockModels> allModels = Db.ClockModels;
+                for (int i = 0; i < enlist.Count; i++)
+                {
+                    ClockModels toupdateitem = (from r in allModels
+                                                where r.CardId == enlist[i].CardId
+                                                select r).FirstOrDefault();
+                    if (toupdateitem == null)
+                    {
+                        failCadID.AppendLine(enlist[i].CardId);
+                        continue;
+                    }
+                    toupdateitem.CardId = enlist[i].CardId.Trim();
+                    toupdateitem.NeedSta = enlist[i].NeedSta;
+                    toupdateitem.NeedSun = enlist[i].NeedSun;
+                    enlist[i] = null;
+
+                    Db.ClockModels.Attach(toupdateitem);
+                    Db.Entry<ClockModels>(toupdateitem).State = EntityState.Modified;
+                    try
+                    {
+                        count += Db.SaveChanges();
+                    }
+                    catch (Exception ex)
+                    {
+                        if (toupdateitem.CardId != null)
+                            failCadID.AppendLine(toupdateitem.CardId);
+                        continue;
+                    }
+                }
+                return Json($"批量设置成功！成功导入{count}条数据！异常的工号“{failCadID.ToString()}”");
+            }
+            catch (Exception ex)
+            {
+                return Json($"批量设置出错,已成功{count}条《预期外的错误》");
+            }
+        }
+        public ActionResult AddDays(string Id,string Days)
+        {
+            try
+            {
+                if (!int.TryParse(Days,out int TotalAdd))
+                    return Json($"添加的天数不合法，{Days}");
+                string[] ids = Id.Split(new char[] { ',' }, StringSplitOptions.RemoveEmptyEntries);
+                if (ids == null) return View("Index");
+                foreach (var id in ids)
+                {
+                    var model1 = (from r in Db.ClockModels
+                                  where r.CardId == id
+                                  select r).FirstOrDefault();
+                    model1.TotalDays += TotalAdd;
+                    model1.FailReason += $"增加使用期限{TotalAdd}天！" + DateTime.Now.ToString();
+                    Db.ClockModels.Attach(model1);
+                    Db.Entry<ClockModels>(model1).State = EntityState.Modified;
+                }
+                Db.SaveChanges();
+                return Json("OK");
+            }
+            catch (Exception ex)
+            {
+                return Json(string.Format("操作失败！异常信息：{0}", ex));
+            }
+        }
+
         #region 遗弃的txt导入导出
         [HttpPost]
         public ActionResult UploadFile()

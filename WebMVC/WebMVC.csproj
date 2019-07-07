@@ -907,6 +907,7 @@
     <Content Include="Content\Site.css" />
     <Content Include="Scripts\bootstrap.js" />
     <Content Include="Scripts\bootstrap.min.js" />
+    <Content Include="版本记录.txt" />
     <EntityDeploy Include="Models\Model1.edmx">
       <Generator>EntityModelCodeGenerator</Generator>
       <LastGenOutput>Model1.Designer.cs</LastGenOutput>
@@ -983,6 +984,7 @@
     <Content Include="Views\Shared\_LoginPartial.cshtml" />
     <Content Include="Views\Home\Index - 复制.cshtml" />
     <Content Include="TemplateFiles\信息导入模板 .xls" />
+    <Content Include="TemplateFiles\周末管理模板.xls" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="App_Data\" />

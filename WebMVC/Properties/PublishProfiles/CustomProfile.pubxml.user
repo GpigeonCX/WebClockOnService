@@ -16,7 +16,7 @@
       <publishTime>04/03/2019 19:31:11</publishTime>
     </File>
     <File Include="bin/Common.dll">
-      <publishTime>05/04/2019 17:57:12</publishTime>
+      <publishTime>07/07/2019 16:19:07</publishTime>
     </File>
     <File Include="bin/Common.Logging.Core.dll">
       <publishTime>04/03/2019 19:31:11</publishTime>
@@ -37,7 +37,7 @@
       <publishTime>04/03/2019 19:31:11</publishTime>
     </File>
     <File Include="bin/Common.pdb">
-      <publishTime>05/04/2019 17:57:12</publishTime>
+      <publishTime>07/07/2019 16:19:07</publishTime>
     </File>
     <File Include="bin/EntityFramework.dll">
       <publishTime>04/03/2019 19:31:11</publishTime>
@@ -136,10 +136,10 @@
       <publishTime>04/03/2019 19:31:15</publishTime>
     </File>
     <File Include="bin/WebMVC.dll">
-      <publishTime>05/04/2019 17:57:14</publishTime>
+      <publishTime>07/07/2019 16:19:09</publishTime>
     </File>
     <File Include="bin/WebMVC.pdb">
-      <publishTime>05/04/2019 17:57:14</publishTime>
+      <publishTime>07/07/2019 16:19:09</publishTime>
     </File>
     <File Include="bin/zh-Hans/EntityFramework.resources.dll">
       <publishTime>04/03/2019 19:31:11</publishTime>
@@ -2262,6 +2262,9 @@
     <File Include="TemplateFiles/信息导入模板.xls">
       <publishTime>03/19/2019 22:25:49</publishTime>
     </File>
+    <File Include="TemplateFiles/周末管理模板.xls">
+      <publishTime>07/07/2019 16:14:41</publishTime>
+    </File>
     <File Include="Views/Account/ExternalLoginConfirmation.cshtml">
       <publishTime>04/03/2019 19:31:08</publishTime>
     </File>
@@ -2293,7 +2296,7 @@
       <publishTime>04/03/2019 19:31:08</publishTime>
     </File>
     <File Include="Views/Home/Index.cshtml">
-      <publishTime>04/03/2019 20:26:58</publishTime>
+      <publishTime>07/07/2019 16:18:06</publishTime>
     </File>
     <File Include="Views/Shared/Error.cshtml">
       <publishTime>04/03/2019 19:31:08</publishTime>
@@ -2312,6 +2315,9 @@
     </File>
     <File Include="Web.config">
       <publishTime>04/03/2019 20:52:02</publishTime>
+    </File>
+    <File Include="版本记录.txt">
+      <publishTime>07/07/2019 16:18:36</publishTime>
     </File>
   </ItemGroup>
 </Project>

@@ -23,6 +23,7 @@
             AddList();
             //$("#btnAdd").click(AddList);//添加
             UpdateList();//修改
+            batchAddDays();//批量增加期限
         });
 
         function initList(queryData) {
@@ -45,7 +46,7 @@
                 multiSort: true,//启用排序 sortable: true //启用排序列
                 pagination: true,
                 pageSize: 50,
-                pageList: [50, 500, 1000, 2000,5000],
+                pageList: [50, 500, 1000, 2000, 5000],
                 queryParams: queryData, //搜索条件查询
                 frozenColumns: [[
                     { field: '选择', checkbox: 'true', width: 30, align: 'center', halign: 'center' },
@@ -95,7 +96,7 @@
                     { field: 'OffTimeEnd', title: 'OffEnd', width: 60, align: 'center', halign: 'center', formatter: DateTimeFormatter },
                     { field: 'NeedSta', title: '周六', width: 60, align: 'center', halign: 'center', formatter: function (value, row, index) { return row.NeedSta ? "是" : "否"; } },
                     { field: 'NeedSun', title: '周日', width: 60, align: 'center', halign: 'center', formatter: function (value, row, index) { return row.NeedSun ? "是" : "否"; } },
-                    { field: 'flag', title: '状态', width: 60, align: 'center', halign: 'center', formatter: function (value, row, index) { return row.flag ? "正常" : "<font color='red' size='6'>" + '停止' + "</font>" ; } },
+                    { field: 'flag', title: '状态', width: 60, align: 'center', halign: 'center', formatter: function (value, row, index) { return row.flag ? "正常" : "<font color='red' size='6'>" + '停止' + "</font>"; } },
 
                 ]],
                 toolbar: [{
@@ -194,8 +195,15 @@
                         $('#ImportExcel').dialog('open');
                     }
                 }, '-', {
+                    id: 'btnreload',
+                    text: '周末管理',
+                    iconCls: 'icon-reload',
+                    handler: function () {
+                        $('#batchExcel').dialog('open');
+                    }
+                }, '-', {
                     id: 'btnhandle',
-                        text: '暂停\恢复',
+                    text: '暂停\恢复',
                     iconCls: 'icon-reload',
                     handler: function () {
                         var RowDeleteByID = $('#tbEmployee').datagrid("getSelections");
@@ -224,6 +232,14 @@
                         else {
                             $.messager.alert("友情提示！", "每次最少操作一行，你已经选择了<font color='red' size='6'>" + RowDeleteByID.length + "</font>行");
                         }
+                    }
+                }, '-', {
+                    id: 'btnAddDays',
+                    text: '延时',
+                    iconCls: 'icon-reload',
+                    handler: function () {
+                        $("#bTotals").val($('#tbEmployee').datagrid("getSelections").length);
+                        $('#AddDaysDialog').dialog('open').dialog('setTitle', '增加时间');
                     }
                 }]
 
@@ -348,7 +364,57 @@
                 }
             });
         };
-
+        function btnBatch() {
+            //导入文件
+            $('#importBatchForm').form('submit', {
+                url: "/Home/UploadBatchExcel?r=" + Math.random(),
+                onSubmit: function () {
+                    $.messager.alert("系统提示！", "正在批量操作,请耐心等待弹窗结果..................");
+                    return $(this).form('validate');
+                },
+                success: function (result) {
+                    $.messager.alert("系统提示！", result);
+                    $("#tbEmployee").datagrid("reload");
+                }
+            });
+        };
+        function batchAddDays() {
+            $("#btnAddDaysGo").click(function () {
+                var valid = $("#addDaysForm").form('validate');
+                if (valid == false) {
+                    return false;
+                }
+                var RowDeleteByID = $('#tbEmployee').datagrid("getSelections");
+                var CardIds = "";
+                if (RowDeleteByID.length >= 1) {
+                    for (var i = RowDeleteByID.length - 1; i >= 0; i--) {
+                        CardIds += ',' + RowDeleteByID[i].CardId;
+                    }
+                    $.messager.confirm("批量增加期限", "你确定增加已选则的用户使用期限吗", function (deleteClient) {
+                        if (deleteClient) {
+                            $.post("/Home/AddDays?r=" + Math.random(), { Id: CardIds, Days: $("#bAddDays").val() }, function (data) {
+                                debugger
+                                if (data == "OK") {
+                                    $.messager.alert("系统提示！", "操作成功");
+                                    //这里要将上次删除的Id清空，否则下次再删除的时候会报错
+                                    RowDeleteByID.length = "";
+                                    $('#AddDaysDialog').dialog('close');
+                                    $("#bTotals").val("");
+                                    $("#bAddDays").val("");
+                                    $("#tbEmployee").datagrid('reload') //重新刷新整个页面
+                                }
+                                else {
+                                    $.messager.alert("系统提示！", data);
+                                }
+                            });
+                        }
+                    });
+                }
+                else {
+                    $.messager.alert("友情提示！", "每次最少操作一行，你已经选择了<font color='red' size='6'>" + RowDeleteByID.length + "</font>行");
+                }
+            });
+        }
     </script>
 
 </head>
@@ -367,9 +433,10 @@
                         <input type="text" class="easyui-validatebox" id="txtUserNameSerach" name="txtUserNameSerach" />&nbsp;
                         <label>停止 </label><input id="boxStop" type="checkbox" />&nbsp;
                         <label>剩余天数小于：</label>
-                        <input id="txtSuplDay" type="text" style="width:30px"/>&nbsp;
+                        <input id="txtSuplDay" type="text" style="width:30px" />&nbsp;
                         <a href="#" class="easyui-linkbutton" iconcls="icon-search" id="btnSerach">搜索</a>
-                        <a href="/TemplateFiles/信息导入模板.xls">信息导入模板下载</a>
+                        <a href="/TemplateFiles/信息导入模板.xls">信息导入模板</a>
+                        <a href="/TemplateFiles/周末管理模板.xls">周末管理模板</a>
                     </div>
                 </form>
             </fieldset>
@@ -392,6 +459,24 @@
             </div>
         </form>
     </div>
+
+    <!-- 批量周末操作的弹出层-->
+    <div class="easyui-dialog" id="batchExcel" title="周末管理" style="width:400px;height:160px;padding:2px;" closed="true" resizable="true" modal="true">
+        <form id="importBatchForm" method="post" enctype="multipart/form-data">
+            <table style="margin:5px;height:70px;">
+                <tr>
+                    <td>请选择文件</td>
+                    <td width="5px;"></td>
+                    <td><input class="easyui-filebox" id="excelImport" name="excelImport" style="width:260px;"></td>
+                    <td></td>
+                </tr>
+            </table><div style="text-align:center;clear:both;margin:5px;">
+                <a id="uploadBatch" class="easyui-linkbutton" data-options="iconCls:'icon-ok'" onclick="btnBatch();" href="javascript:void(0)">上传</a>
+                <a class="easyui-linkbutton" data-options="iconCls:'icon-cancel'" onclick="javascript:$('#batchExcel').dialog('close')" href="javascript:void(0)">关闭</a>
+            </div>
+        </form>
+    </div>
+
     <div data-options="region:'center'">
         <div class="easyui-layout" data-options="fit:true" style="background: #ccc;">
             <table id="tbEmployee" class="easyui-datagrid" title="员工信息" style="width:700px;height:700px"
@@ -618,6 +703,39 @@
                         <td colspan="2" style="text-align: center">
                             <a href="javascript:void(0)" class="easyui-linkbutton" id="btnUpdate" iconcls="icon-ok">确定</a>
                             <a href="javascript:void(0)" class="easyui-linkbutton" iconcls="icon-cancel" onclick="javascript:$('#UpdateDialog').dialog('close')">关闭</a>
+                        </td>
+                    </tr>
+                </table>
+            </fieldset>
+        </form>
+    </div>
+
+    <!--设置批量增加天数的弹出层-->
+    <div id="AddDaysDialog" class="easyui-dialog" style="width: 300px; height:200px; padding: 10px 20px;" closed="true" resizable="true" modal="true" data-options="iconCls: 'icon-add',buttons: '#dlg-buttons'">
+        <form id="addDaysForm" method="post" novalidate="novalidate">
+            <fieldset>
+                <legend>增加天数信息填写栏</legend>
+                <table id="tblAddDays">
+                    <tr>
+                        <td>
+                            <label>已选中人数：</label>
+                        </td>
+                        <td>
+                            <input class="easyui-validatebox" type="text" id="bTotals" readonly="readonly" />
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            <label>增加天数：</label>
+                        </td>
+                        <td>
+                            <input class="easyui-validatebox" type="text" id="bAddDays" data-options="required:true,validType:'length[1,3]'" />
+                        </td>
+                    </tr>
+                    <tr>
+                        <td colspan="2" style="text-align: center">
+                            <a href="javascript:void(0)" class="easyui-linkbutton" id="btnAddDaysGo" iconcls="icon-ok">确定</a>
+                            <a href="javascript:void(0)" class="easyui-linkbutton" iconcls="icon-cancel" onclick="javascript:$('#AddDaysDialog').dialog('close')">关闭</a>
                         </td>
                     </tr>
                 </table>
