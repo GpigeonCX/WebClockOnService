@@ -230,7 +230,8 @@
                             });
                         }
                         else {
-                            $.messager.alert("友情提示！", "每次最少操作一行，你已经选择了<font color='red' size='6'>" + RowDeleteByID.length + "</font>行");
+                            $('#stopExcel').dialog('open');
+                            //$.messager.alert("友情提示！", "每次最少操作一行，你已经选择了<font color='red' size='6'>" + RowDeleteByID.length + "</font>行");
                         }
                     }
                 }, '-', {
@@ -378,6 +379,23 @@
                 }
             });
         };
+
+        function btnStop() {
+            //导入文件
+            $('#importStopForm').form('submit', {
+                url: "/Home/UploadStopExcel?r=" + Math.random(),
+                onSubmit: function () {
+                    $.messager.alert("系统提示！", "正在批量操作,请耐心等待弹窗结果..................");
+                    return $(this).form('validate');
+                },
+                success: function (result) {
+                    $.messager.alert("系统提示！", result);
+                    $("#tbEmployee").datagrid("reload");
+                }
+            });
+        };
+
+        
         function batchAddDays() {
             $("#btnAddDaysGo").click(function () {
                 var valid = $("#addDaysForm").form('validate');
@@ -473,6 +491,23 @@
             </table><div style="text-align:center;clear:both;margin:5px;">
                 <a id="uploadBatch" class="easyui-linkbutton" data-options="iconCls:'icon-ok'" onclick="btnBatch();" href="javascript:void(0)">上传</a>
                 <a class="easyui-linkbutton" data-options="iconCls:'icon-cancel'" onclick="javascript:$('#batchExcel').dialog('close')" href="javascript:void(0)">关闭</a>
+            </div>
+        </form>
+    </div>
+
+    <!-- 批量周末操作的弹出层-->
+    <div class="easyui-dialog" id="stopExcel" title="暂停管理" style="width:400px;height:160px;padding:2px;" closed="true" resizable="true" modal="true">
+        <form id="importStopForm" method="post" enctype="multipart/form-data">
+            <table style="margin:5px;height:70px;">
+                <tr>
+                    <td>请选择文件</td>
+                    <td width="5px;"></td>
+                    <td><input class="easyui-filebox" id="excelImport" name="excelImport" style="width:260px;"></td>
+                    <td></td>
+                </tr>
+            </table><div style="text-align:center;clear:both;margin:5px;">
+                <a id="uploadStop" class="easyui-linkbutton" data-options="iconCls:'icon-ok'" onclick="btnStop();" href="javascript:void(0)">上传</a>
+                <a class="easyui-linkbutton" data-options="iconCls:'icon-cancel'" onclick="javascript:$('#stopExcel').dialog('close')" href="javascript:void(0)">关闭</a>
             </div>
         </form>
     </div>
@@ -709,7 +744,6 @@
             </fieldset>
         </form>
     </div>
-
     <!--设置批量增加天数的弹出层-->
     <div id="AddDaysDialog" class="easyui-dialog" style="width: 300px; height:200px; padding: 10px 20px;" closed="true" resizable="true" modal="true" data-options="iconCls: 'icon-add',buttons: '#dlg-buttons'">
         <form id="addDaysForm" method="post" novalidate="novalidate">
